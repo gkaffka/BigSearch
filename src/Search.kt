@@ -41,7 +41,7 @@ class Search {
             print("Sorry, I could not find the \"$text\" text in the book")
             return
         }
-        println("I found ${startPositions?.size} ocurrencies for \"$text\"")
+        println("I found ${startPositions.size} ocurrencies for \"$text\"")
         println("These are the occurrence locations in the text \n$startPositions")
     }
 }
