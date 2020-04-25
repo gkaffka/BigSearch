@@ -8,11 +8,6 @@ class Search {
         }
         val nodes = splitQuery.map { map[it] }
         val startPositions = getStartPositions(splitQuery, nodes)
-        if (startPositions.isNullOrEmpty()) {
-            print("Sorry, not found")
-            return
-        }
-
         printResult(query, startPositions)
     }
 
@@ -42,6 +37,10 @@ class Search {
         }
 
     private fun printResult(text: String, startPositions: List<Int>?) {
+        if (startPositions.isNullOrEmpty()) {
+            print("Sorry, I could not find the \"$text\" text in the book")
+            return
+        }
         println("I found ${startPositions?.size} ocurrencies for \"$text\"")
         println("These are the occurrence locations in the text \n$startPositions")
     }
