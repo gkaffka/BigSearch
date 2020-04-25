@@ -1,45 +1,48 @@
 class Search {
-    fun search(text: String) {
-        val map = HashMap<String, MutableList<Int>?>()
-        val splitText = text.split(" ")
-        book.split(" ").forEachIndexed { index, s ->
-            map[s] = if (map[s] == null) mutableListOf<Int>().apply { this.add(index) }
-            else map[s].apply { this?.add(index) }
-        }
-
-        if (splitText.size == 1) {
-            println(map[splitText[0]])
+    fun search(query: String) {
+        val map = buildBookHash(book)
+        val splitQuery = query.split(" ")
+        if (splitQuery.size == 1) {
+            printResult(query, map[splitQuery[0]]?.toList())
             return
         }
-
-        val validStartPosition = mutableListOf<Int>()
-        val nodes = splitText.map { map[it] }
-
-        nodes.forEachIndexed { iNode, node ->
-            node?.forEach { position ->
-                if (iNode + 1 >= nodes.size) return@forEachIndexed
-                nodes[iNode + 1]?.forEach { positionNext ->
-                    if ((positionNext - position) == 1) {
-                        validStartPosition.add(position)
-                    }
-                }
-            }
-        }
-        validStartPosition.sort()
-
-        if (validStartPosition.isNullOrEmpty()) {
+        val nodes = splitQuery.map { map[it] }
+        val startPositions = getStartPositions(splitQuery, nodes)
+        if (startPositions.isNullOrEmpty()) {
             print("Sorry, not found")
             return
         }
 
-        //Indicates the word position in the text
-        val startPositions = validStartPosition
-            .chunked(splitText.size - 1)
-            .map { it.first() }
-
-
-        println(startPositions)
+        printResult(query, startPositions)
     }
 
+    private fun buildBookHash(book: String): HashMap<String, MutableList<Int>?> {
+        val map = HashMap<String, MutableList<Int>?>()
+        book.split(" ").forEachIndexed { index, s ->
+            map[s] = if (map[s] == null) mutableListOf<Int>().apply { this.add(index) }
+            else map[s].apply { this?.add(index) }
+        }
+        return map
+    }
 
+    private fun getStartPositions(splitQuery: List<String>, nodes: List<List<Int>?>) =
+        mutableListOf<Int>().apply {
+            var nodeProbe = 0;
+            nodes.first()?.forEach { position ->
+                nodes.forEachIndexed { depth, link ->
+                    if (link?.contains(position + depth) == true) nodeProbe++
+                    else nodeProbe = 0
+                    return@forEachIndexed
+                }
+                if (nodeProbe == splitQuery.size) {
+                    this.add(position)
+                    nodeProbe = 0
+                }
+            }
+        }
+
+    private fun printResult(text: String, startPositions: List<Int>?) {
+        println("I found ${startPositions?.size} ocurrencies for \"$text\"")
+        println("These are the occurrence locations in the text \n$startPositions")
+    }
 }
